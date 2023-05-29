@@ -1,28 +1,29 @@
-import { useQuery } from "react-query";
 import CatCardPanel from "../components/catCardPanel";
 import CatCardCreator from "../components/catCardCreator";
 import DemoFooter from "../components/demoFooter";
-import { Inter } from "next/font/google";
+import {Inter} from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { UserData } from "@/types/global";
+import {UserData} from "@/types/global";
+import {useContext, useEffect, useState} from "react";
+import {Context} from "./context";
 const DB_API_URI = "http://localhost:3001";
-const inter = Inter({ subsets: ["latin"] });
-// Mock userID for testing.
-const userID = 42;
+const inter = Inter({subsets: ["latin"]});
 
 export default function App() {
+  const {userID} = useContext(Context);
   const endpoint = `${DB_API_URI}/users/${userID}`;
-  const { isLoading, error, data } = useQuery(
-    ["userData", userID],
-    (): Promise<UserData> => fetch(endpoint).then((res) => res.json())
-  );
+  const [user, setUser] = useState<UserData>();
+  const fetchUser = async () => {
+    const data = await fetch(endpoint)
+      .then((res) => res.json())
+      .then((data) => data);
+    setUser(data);
+  };
 
-  if (isLoading) return <div>"Loading..."</div>;
+  useEffect(() => {
+    fetchUser();
+  }, [userID]);
 
-  if (error && error instanceof Error)
-    return <div>{"An error has occurred: " + error.message}</div>;
-
-  if (!data) return <div>No data</div>;
   return (
     <>
       <div className={styles.main}>
@@ -31,15 +32,22 @@ export default function App() {
             <h1 className={inter.className}>Cat Club 🐱</h1>
           </div>
         </div>
-        <div className={styles.row}>
+        <div style={{justifyContent: "space-around"}} className={styles.row}>
           <div className={styles.col}>
-            <CatCardCreator />
+            <CatCardCreator currentUser={user} />
           </div>
           <div className={styles.col}>
-            <CatCardPanel herd={data.herd} />
+            <CatCardPanel herd={user?.herd} name={user?.firstName} />
           </div>
         </div>
-        <div className={styles.row}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "2rem",
+            justifyContent: "center",
+          }}
+          className={styles.row}
+        >
           <DemoFooter />
         </div>
       </div>

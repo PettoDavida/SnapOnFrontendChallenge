@@ -1,9 +1,17 @@
 export interface UserData {
   id: number;
-  firstname: string;
+  firstName: string;
   lastname: string;
   wallet: number;
   herd: CatCardProps[];
+}
+
+export interface CatData {
+  breeds: [];
+  id: string;
+  url: string;
+  width: number;
+  height: number;
 }
 
 export interface CatCardProps {
